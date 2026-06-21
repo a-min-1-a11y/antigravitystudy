@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitMeal – 건강한 대학생 한 끼 식단 플래너</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- SVG gradient definition for radial chart -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="radialGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#667eea"/>
+        <stop offset="100%" style="stop-color:#764ba2"/>
+      </linearGradient>
+    </defs>
+  </svg>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="url(#logoGrad)"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="2" y1="2" x2="22" y2="22">
+                <stop stop-color="#667eea"/>
+                <stop offset="1" stop-color="#764ba2"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="brand-name">FitMeal</span>
+          <span class="brand-sub">대학생 식단 플래너</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" data-tab="tab-dashboard" id="btn-tab-dashboard">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          식단 추천
+        </button>
+        <button class="nav-btn" data-tab="tab-food-manager" id="btn-tab-food-manager">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          음식 DB 관리
+        </button>
+        <button class="nav-btn" data-tab="tab-profile-settings" id="btn-tab-profile-settings">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          내 프로필 설정
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card-mini">
+          <div class="avatar">🎓</div>
+          <div class="user-info-mini">
+            <p class="user-name-mini" id="mini-user-name">대학생 사용자</p>
+            <p class="user-status-mini" id="mini-user-goal">설정 중...</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- TAB 1: DASHBOARD -->
+      <section id="tab-dashboard" class="tab-panel active">
+        <header class="content-header">
+          <div>
+            <h1>오늘의 맞춤 식단 추천</h1>
+            <p class="subtitle">목표 칼로리와 탄단지 비율에 맞는 최적의 한 끼를 추천합니다.</p>
+          </div>
+          <div class="quick-status" id="chip-target-calories">한 끼 목표: 0 kcal</div>
+        </header>
+
+        <!-- Nutrition Summary -->
+        <div class="nutrition-summary-cards">
+          <div class="summary-card carb-card">
+            <div class="card-title">탄수화물 권장량</div>
+            <div class="card-val"><span id="target-carb">0</span>g</div>
+            <div class="card-desc">한 끼 기준 (전체 열량의 <span id="percent-carb">0</span>%)</div>
+          </div>
+          <div class="summary-card protein-card">
+            <div class="card-title">단백질 권장량</div>
+            <div class="card-val"><span id="target-protein">0</span>g</div>
+            <div class="card-desc">한 끼 기준 (전체 열량의 <span id="percent-protein">0</span>%)</div>
+          </div>
+          <div class="summary-card fat-card">
+            <div class="card-title">지방 권장량</div>
+            <div class="card-val"><span id="target-fat">0</span>g</div>
+            <div class="card-desc">한 끼 기준 (전체 열량의 <span id="percent-fat">0</span>%)</div>
+          </div>
+        </div>
+
+        <div class="recommendation-container">
+          <!-- Selection Panel -->
+          <div class="selection-panel glass-card">
+            <h2>음식 종류 선택</h2>
+            <p class="panel-guide">드시고 싶은 카테고리를 선택하세요.</p>
+            <div class="category-grid">
+              <button class="category-btn active" data-category="모두">
+                <span class="cat-emoji">🍽️</span>
+                <span class="cat-label">전체</span>
+              </button>
+              <button class="category-btn" data-category="한식">
+                <span class="cat-emoji">🍚</span>
+                <span class="cat-label">한식</span>
+              </button>
+              <button class="category-btn" data-category="중식">
+                <span class="cat-emoji">🥢</span>
+                <span class="cat-label">중식</span>
+              </button>
+              <button class="category-btn" data-category="일식">
+                <span class="cat-emoji">🍣</span>
+                <span class="cat-label">일식</span>
+              </button>
+              <button class="category-btn" data-category="이탈리안">
+                <span class="cat-emoji">🍕</span>
+                <span class="cat-label">이탈리안</span>
+              </button>
+              <button class="category-btn" data-category="아메리칸">
+                <span class="cat-emoji">🍔</span>
+                <span class="cat-label">아메리칸</span>
+              </button>
+              <button class="category-btn" data-category="동남아식">
+                <span class="cat-emoji">🍜</span>
+                <span class="cat-label">동남아식</span>
+              </button>
+              <button class="category-btn" data-category="남아시아식">
+                <span class="cat-emoji">🍛</span>
+                <span class="cat-label">남아시아식</span>
+              </button>
+              <button class="category-btn" data-category="중남미식">
+                <span class="cat-emoji">🌮</span>
+                <span class="cat-label">중남미식</span>
+              </button>
+            </div>
+            <button class="action-btn-primary" id="btn-recommend">
+              <span>최적의 식단 추천받기</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+
+          <!-- Result Panel -->
+          <div class="result-panel glass-card" id="recommendation-result">
+            <div class="empty-state-view" id="result-empty-state">
+              <div class="empty-icon">💡</div>
+              <h3>카테고리를 선택하고 추천 버튼을 눌러주세요!</h3>
+              <p>체형 정보와 목표 영양소에 최적화된 한 끼 메뉴를 찾아드립니다.</p>
+            </div>
+
+            <div class="loaded-result-view hidden" id="result-loaded-state">
+              <div class="recommend-header">
+                <span class="recommend-badge">BEST MATCH</span>
+                <button class="btn-reroll" id="btn-reroll">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                  다른 메뉴
+                </button>
+              </div>
+
+              <div class="food-main-info">
+                <div class="food-title-row">
+                  <h2 class="food-name" id="result-food-name">-</h2>
+                  <span class="food-category-tag" id="result-food-category">-</span>
+                </div>
+                <div class="food-calories-display">
+                  <span class="kcal-number" id="result-food-calories">0</span>
+                  <span class="kcal-unit">kcal</span>
+                </div>
+              </div>
+
+              <div class="chart-comparison-section">
+                <div class="radial-chart-container">
+                  <svg class="radial-chart" width="160" height="160" viewBox="0 0 160 160">
+                    <circle class="radial-bg" cx="80" cy="80" r="65"/>
+                    <circle class="radial-progress" id="radial-calories-progress" cx="80" cy="80" r="65"/>
+                  </svg>
+                  <div class="radial-chart-label">
+                    <span class="radial-pct" id="result-cal-match-pct">0%</span>
+                    <span class="radial-text">칼로리 일치</span>
+                  </div>
+                </div>
+
+                <div class="nutrients-progress-bars">
+                  <h3>탄단지 매칭 현황</h3>
+                  <div class="nutr-progress-item">
+                    <div class="nutr-progress-label">
+                      <span>탄수화물 (<span id="result-food-carb">0</span>g / <span id="result-target-carb">0</span>g)</span>
+                      <span class="nutr-pct-val" id="result-carb-match-pct">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                      <div class="progress-bar-fill carb-fill" id="bar-carb-progress"></div>
+                    </div>
+                  </div>
+                  <div class="nutr-progress-item">
+                    <div class="nutr-progress-label">
+                      <span>단백질 (<span id="result-food-protein">0</span>g / <span id="result-target-protein">0</span>g)</span>
+                      <span class="nutr-pct-val" id="result-protein-match-pct">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                      <div class="progress-bar-fill protein-fill" id="bar-protein-progress"></div>
+                    </div>
+                  </div>
+                  <div class="nutr-progress-item">
+                    <div class="nutr-progress-label">
+                      <span>지방 (<span id="result-food-fat">0</span>g / <span id="result-target-fat">0</span>g)</span>
+                      <span class="nutr-pct-val" id="result-fat-match-pct">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                      <div class="progress-bar-fill fat-fill" id="bar-fat-progress"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="recommend-feedback-msg" id="recommendation-message">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alternatives -->
+        <div class="alternatives-section hidden" id="alternatives-panel">
+          <h2>대체 메뉴 후보</h2>
+          <div class="alternatives-grid" id="alternatives-container"></div>
+        </div>
+      </section>
+
+      <!-- TAB 2: FOOD MANAGER -->
+      <section id="tab-food-manager" class="tab-panel">
+        <header class="content-header">
+          <div>
+            <h1>음식 데이터베이스 관리</h1>
+            <p class="subtitle">추천 알고리즘의 기반이 되는 음식 목록을 조회하고 추가, 수정, 삭제합니다.</p>
+          </div>
+          <button class="action-btn-primary" id="btn-add-food-open">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            새 음식 추가
+          </button>
+        </header>
+
+        <div class="manager-container glass-card">
+          <div class="table-controls">
+            <div class="search-box">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="food-search-input" placeholder="음식명 또는 카테고리 검색...">
+            </div>
+            <div class="filter-dropdown-container">
+              <select id="food-filter-category" class="select-dropdown">
+                <option value="모두">모든 카테고리</option>
+                <option value="한식">한식</option>
+                <option value="중식">중식</option>
+                <option value="일식">일식</option>
+                <option value="이탈리안">이탈리안</option>
+                <option value="아메리칸">아메리칸</option>
+                <option value="동남아식">동남아식</option>
+                <option value="남아시아식">남아시아식</option>
+                <option value="중남미식">중남미식</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="food-table">
+              <thead>
+                <tr>
+                  <th>음식명</th>
+                  <th>카테고리</th>
+                  <th>열량 (kcal)</th>
+                  <th>탄수화물 (g)</th>
+                  <th>단백질 (g)</th>
+                  <th>지방 (g)</th>
+                  <th class="actions-col">관리</th>
+                </tr>
+              </thead>
+              <tbody id="food-table-body"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="total-food-count">총 0개의 음식이 등록되어 있습니다.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: PROFILE SETTINGS -->
+      <section id="tab-profile-settings" class="tab-panel">
+        <header class="content-header">
+          <div>
+            <h1>내 프로필 및 건강 설정</h1>
+            <p class="subtitle">신체 지수와 다이어트 목표를 기록합니다. CSV 파일에 저장됩니다.</p>
+          </div>
+        </header>
+
+        <div class="settings-grid">
+          <div class="profile-form-panel glass-card">
+            <h2>신체 데이터 입력</h2>
+            <p class="panel-guide">정확한 정보 입력이 올바른 추천의 핵심입니다.</p>
+            <form id="profile-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prof-gender">성별</label>
+                  <select id="prof-gender" class="form-control" required>
+                    <option value="Female">여성 (Female)</option>
+                    <option value="Male">남성 (Male)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="prof-age">연령 (만 나이)</label>
+                  <input type="number" id="prof-age" class="form-control" min="1" max="120" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prof-height">신장 (cm)</label>
+                  <input type="number" id="prof-height" class="form-control" step="0.1" min="50" max="250" required>
+                </div>
+                <div class="form-group">
+                  <label for="prof-weight">체중 (kg)</label>
+                  <input type="number" id="prof-weight" class="form-control" step="0.1" min="20" max="300" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="prof-activity">활동량</label>
+                <select id="prof-activity" class="form-control" required>
+                  <option value="Sedentary">비활동적 (운동 거의 안 함)</option>
+                  <option value="Lightly Active">가벼운 활동 (주 1~3회 운동)</option>
+                  <option value="Moderately Active">보통 활동 (주 3~5회 운동)</option>
+                  <option value="Very Active">매우 활동적 (매일 고강도 운동)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="prof-goal">다이어트 목표</label>
+                <select id="prof-goal" class="form-control" required>
+                  <option value="Weight Loss">3kg 감량 (다이어트)</option>
+                  <option value="Maintain">현재 체중 유지 (건강 관리)</option>
+                  <option value="Weight Gain">3kg 증량 (벌크업)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="prof-diet-type">선호 영양소 비율 (탄 : 단 : 지)</label>
+                <select id="prof-diet-type" class="form-control" required>
+                  <option value="Balanced">균형적인 식단 (50% : 30% : 20%)</option>
+                  <option value="Low Carb">저탄수화물 고단백 (20% : 30% : 50%)</option>
+                  <option value="High Protein">고단백질 다이어트 (40% : 40% : 20%)</option>
+                </select>
+              </div>
+              <button type="submit" class="action-btn-primary full-width">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                설정 및 저장하기
+              </button>
+            </form>
+          </div>
+
+          <div class="profile-calculations-panel glass-card">
+            <h2>건강 지수 분석 결과</h2>
+            <p class="panel-guide">입력 정보를 기반으로 실시간 계산된 다이어트 가이드라인입니다.</p>
+            <div class="calc-results-list">
+              <div class="calc-item">
+                <span class="calc-label">기초대사량 (BMR)</span>
+                <span class="calc-value" id="calc-bmr">0 kcal</span>
+              </div>
+              <div class="calc-item">
+                <span class="calc-label">활동대사량 (TDEE)</span>
+                <span class="calc-value" id="calc-tdee">0 kcal</span>
+              </div>
+              <div class="calc-item highlight-target-weight">
+                <span class="calc-label">목표 체중 (Target Weight)</span>
+                <span class="calc-value" id="calc-target-weight">0 kg</span>
+              </div>
+              <div class="calc-item highlight-calories">
+                <span class="calc-label">일일 권장 섭취 열량</span>
+                <span class="calc-value" id="calc-daily-calories">0 kcal</span>
+              </div>
+              <div class="calc-item highlight-meal">
+                <span class="calc-label">한 끼 권장 섭취 열량 (1/3)</span>
+                <span class="calc-value" id="calc-meal-calories">0 kcal</span>
+              </div>
+            </div>
+
+            <div class="nutrients-split-visual">
+              <h3>한 끼 권장 영양소 세부</h3>
+              <div class="nutr-distribution-bars">
+                <div class="nutr-split-item">
+                  <div class="split-header">
+                    <span>탄수화물 (<span id="calc-carb-percent">50</span>%)</span>
+                    <span class="split-g" id="calc-meal-carb">0g</span>
+                  </div>
+                  <div class="split-bar-container">
+                    <div class="split-bar-fill carb-fill" id="split-bar-carb" style="width:50%"></div>
+                  </div>
+                </div>
+                <div class="nutr-split-item">
+                  <div class="split-header">
+                    <span>단백질 (<span id="calc-protein-percent">30</span>%)</span>
+                    <span class="split-g" id="calc-meal-protein">0g</span>
+                  </div>
+                  <div class="split-bar-container">
+                    <div class="split-bar-fill protein-fill" id="split-bar-protein" style="width:30%"></div>
+                  </div>
+                </div>
+                <div class="nutr-split-item">
+                  <div class="split-header">
+                    <span>지방 (<span id="calc-fat-percent">20</span>%)</span>
+                    <span class="split-g" id="calc-meal-fat">0g</span>
+                  </div>
+                  <div class="split-bar-container">
+                    <div class="split-bar-fill fat-fill" id="split-bar-fat" style="width:20%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="csv-path-display">
+              <span class="csv-icon">🌐</span>
+              <div class="csv-info-text">
+                <span class="csv-title">저장 방식 (웹 버전)</span>
+                <span class="csv-path">localStorage (브라우저 내부 저장)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Food Modal -->
+  <div class="modal-overlay" id="food-modal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h2 id="modal-title">새 음식 추가</h2>
+        <button class="btn-close-modal" id="btn-food-modal-close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="food-form">
+        <input type="hidden" id="food-form-id">
+        <div class="form-group">
+          <label for="food-form-name">음식명</label>
+          <input type="text" id="food-form-name" class="form-control" placeholder="예: 닭가슴살 샐러드" required>
+        </div>
+        <div class="form-group">
+          <label for="food-form-category">음식 분류</label>
+          <select id="food-form-category" class="form-control" required>
+            <option value="한식">한식</option>
+            <option value="중식">중식</option>
+            <option value="일식">일식</option>
+            <option value="이탈리안">이탈리안</option>
+            <option value="아메리칸">아메리칸</option>
+            <option value="동남아식">동남아식</option>
+            <option value="남아시아식">남아시아식</option>
+            <option value="중남미식">중남미식</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="food-form-calories">열량 (kcal)</label>
+            <input type="number" id="food-form-calories" class="form-control" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="food-form-carbs">탄수화물 (g)</label>
+            <input type="number" id="food-form-carbs" class="form-control" min="0" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="food-form-protein">단백질 (g)</label>
+            <input type="number" id="food-form-protein" class="form-control" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="food-form-fat">지방 (g)</label>
+            <input type="number" id="food-form-fat" class="form-control" min="0" required>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btn-food-modal-cancel">취소</button>
+          <button type="submit" class="action-btn-primary">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
